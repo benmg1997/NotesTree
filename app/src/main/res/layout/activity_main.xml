@@ -26,7 +26,6 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:src="@drawable/folderbig"
-        android:visibility="gone"
         app:backgroundTint="#000000"
         app:layout_constraintBottom_toTopOf="@+id/fab"
         app:layout_constraintEnd_toEndOf="@+id/fab"
@@ -38,11 +37,21 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:src="@drawable/textsmall"
-        android:visibility="gone"
         app:backgroundTint="#000000"
         app:layout_constraintBottom_toTopOf="@+id/fabFolder"
         app:layout_constraintEnd_toEndOf="@+id/fabFolder"
         app:layout_constraintStart_toStartOf="@+id/fabFolder" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabChain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:src="@drawable/chainsmall"
+        app:backgroundTint="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/fabFile"
+        app:layout_constraintEnd_toEndOf="@+id/fabFile"
+        app:layout_constraintStart_toStartOf="@+id/fabFile" />
 
     <LinearLayout
         android:id="@+id/linearLayout3"

@@ -2,6 +2,7 @@ package com.example.notetree;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +13,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.FolderViewHolder> {
 
@@ -46,7 +50,7 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.FolderView
                 }
             });
         }
-        else {
+        else if(folders[position].getName().substring(folders[position].getName().length() - 3).equals("txt")) {
             holder.b.setText(folders[position].getName());
             holder.del.setImageResource(R.drawable.textsmall);
             MainActivity.currentFile = folders[position];
@@ -54,6 +58,28 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.FolderView
                 @Override
                 public void onClick(View v) {
                     MainActivity.currentFile = new File(folders[position].getPath());
+                    context.startActivity(new Intent(context, TextEditActivity.class));
+                }
+            });
+        }
+        else if(folders[position].getName().substring(folders[position].getName().length() - 3).equals("chn")) {
+            holder.b.setText(folders[position].getName());
+            holder.del.setImageResource(R.drawable.chainsmall);
+            holder.b.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String path = "";
+                    MainActivity.currentFile = folders[position];
+                    try {
+                        BufferedReader br = new BufferedReader(new FileReader(MainActivity.currentFile));
+                        path = br.readLine();
+                        br.close();
+                    }
+                    catch (IOException e) {
+                        Log.e(MainActivity.LOGTAG, e.toString());
+                    }
+                    Log.i(MainActivity.LOGTAG, path);
+                    MainActivity.currentFile = new File(MainActivity.notesDirectory, path);
                     context.startActivity(new Intent(context, TextEditActivity.class));
                 }
             });

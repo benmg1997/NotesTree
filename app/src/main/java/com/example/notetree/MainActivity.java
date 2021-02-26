@@ -18,9 +18,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     public static File currentFile;
     public static File selectedFile;
 
-    public int creating = 0; // 0 for folder, 1 for file
+    public int creating = 0; // 0 for folder, 1 for file, 2 for chain
 
     public RecyclerView rV;
     public FolderAdapter fA;
@@ -133,6 +136,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        FloatingActionButton fabChain = findViewById(R.id.fabChain);
+        fabChain.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                createInputVisibility(View.VISIBLE);
+                creating = 2;
+                ((ImageView) findViewById(R.id.nameInputImage)).setImageResource(R.drawable.chainsmall);
+                createChoiceVisibility(View.GONE);
+            }
+        });
+
         yes = findViewById(R.id.areYouSureYes);
         no = findViewById(R.id.areYouSureNo);
         yes.setOnClickListener(new View.OnClickListener() {
@@ -214,6 +228,7 @@ public class MainActivity extends AppCompatActivity {
         deleteVisibility(View.GONE);
         findViewById(R.id.fabFolder).setVisibility(View.GONE);
         findViewById(R.id.fabFile).setVisibility(View.GONE);
+        findViewById(R.id.fabChain).setVisibility(View.GONE);
     }
 
 
@@ -225,8 +240,11 @@ public class MainActivity extends AppCompatActivity {
         if(creating == 0) {
             ((ImageView) findViewById(R.id.nameInputImage)).setImageResource(R.drawable.foldersmall);
         }
-        else {
+        else if(creating == 1) {
             ((ImageView) findViewById(R.id.nameInputImage)).setImageResource(R.drawable.textsmall);
+        }
+        else if(creating == 2) {
+            ((ImageView) findViewById(R.id.nameInputImage)).setImageResource(R.drawable.chainsmall);
         }
         ((TextView) findViewById(R.id.nameInput)).setText("");
         findViewById(R.id.nameInputBox).setVisibility(visibility);
@@ -234,36 +252,65 @@ public class MainActivity extends AppCompatActivity {
     public void createChoiceVisibility(int visibility) {
         findViewById(R.id.fabFile).setVisibility(visibility);
         findViewById(R.id.fabFolder).setVisibility(visibility);
+        findViewById(R.id.fabChain).setVisibility(visibility);
     }
     public void create() {
         TextView textView = findViewById(R.id.nameInput);
-        try {
-            if (creating == 0) {
-                File temp = new File(currentDirectory, textView.getText().toString());
-                if (!temp.exists()) {
-                    Log.e(LOGTAG, "Directory not exist");
-                    if (!temp.mkdir()) {
-                        Log.e(LOGTAG, "Directory not created");
-                    } else {
-                        Log.i(LOGTAG, "Directory is created");
-                    }
-                }
-            }
-            if (creating == 1) {
-                File temp = new File(currentDirectory, textView.getText().toString() + ".txt");
-                if (!temp.exists()) {
-                    Log.e(LOGTAG, "File not exist");
-                    if (!temp.createNewFile()) {
-                        Log.e(LOGTAG, "File not created");
-                    } else {
-                        Log.i(LOGTAG, "File is created");
-                    }
-                }
-            }
-            fA.refresh();
+        if(textView.getText().toString().equals("")) {
+            Toast.makeText(this, "Input empty", Toast.LENGTH_SHORT).show();
         }
-        catch (IOException e) {
-            Log.e(LOGTAG, e.toString());
+        else {
+            try {
+                if (creating == 0) {
+                    File temp = new File(currentDirectory, textView.getText().toString());
+                    if (!temp.exists()) {
+                        Log.e(LOGTAG, "Directory not exist");
+                        if (!temp.mkdir()) {
+                            Log.e(LOGTAG, "Directory not created");
+                        } else {
+                            Log.i(LOGTAG, "Directory is created");
+                        }
+                    }
+                }
+                if (creating == 1) {
+                    File temp = new File(currentDirectory, textView.getText().toString() + ".txt");
+                    if (!temp.exists()) {
+                        Log.e(LOGTAG, "File not exist");
+                        if (!temp.createNewFile()) {
+                            Log.e(LOGTAG, "File not created");
+                        } else {
+                            Log.i(LOGTAG, "File is created");
+                        }
+                    }
+                }
+                if (creating == 2) {
+                    File file = new File(notesDirectory, textView.getText().toString());
+                    if (file.exists()) {
+                        File temp = new File(currentDirectory, file.getName().substring(0, file.getName().length() - 4) + ".chn");
+                        if (!temp.exists()) {
+                            Log.e(LOGTAG, "File not exist");
+                            if (!temp.createNewFile()) {
+                                Log.e(LOGTAG, "File not created");
+                            } else {
+                                Log.i(LOGTAG, "File is created");
+                                try {
+                                    OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(temp));
+                                    Log.i(LOGTAG, textView.getText().toString());
+                                    outputStreamWriter.write(textView.getText().toString());
+                                    outputStreamWriter.close();
+                                } catch (IOException e) {
+                                    Log.e(MainActivity.LOGTAG, e.toString());
+                                }
+                            }
+                        }
+                    } else {
+                        Toast.makeText(this, "File doesn't exist", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                fA.refresh();
+            } catch (IOException e) {
+                Log.e(LOGTAG, e.toString());
+            }
         }
     }
 
